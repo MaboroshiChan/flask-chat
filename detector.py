@@ -17,4 +17,14 @@ class Detector:
         log.info("Loaded keywords")
 
     def detect(self, text: str)->bool:
-        pass
+        jieba.cut(text, cut_all=True)
+        for word in self.keywords:
+            if word in text:
+                return True
+        return False
+    
+    def detect_list(self, text: list[str])->bool:
+        for t in text:
+            if self.detect(t):
+                return True
+        return False
