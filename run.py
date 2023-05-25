@@ -18,7 +18,7 @@ def gpt3():
     print(f"Received messages: \n{messages}")
 
     detector = detector.Detector()
-    if detector.detect_list(messages):
+    if detector.detect_list([x['text'] for x in messages]):
         log.info("Detected keywords, not sending to GPT-3")
         return jsonify({
             "chat_id": chat_id,
@@ -40,7 +40,6 @@ def gpt3():
 
     log.info("Answer: \n" + str(resp))
     return jsonify(resp)
-
 
 if __name__ == '__main__':
     log.basicConfig(level=log.INFO)
