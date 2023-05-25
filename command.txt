@@ -1,7 +1,6 @@
-curl http://localhost:8080/api/v1/products 
+curl http://localhost:8000/gpt3 \
         -H "Content-Type: application/json" \
-        -d "{
-                "chat_id": "1234567890",
+        -d '{"chat_id": "1234567890",
                 "messages": [
                     {
                         "sender": "alice",
@@ -14,6 +13,10 @@ curl http://localhost:8080/api/v1/products
                     {
                         "sender": "alice",
                         "text": "这么油腻的吗"
+                    },
+                    {
+                        "sender": "bob",
+                        "text": ""
                     }
                 ]
-            }" \
+            }'

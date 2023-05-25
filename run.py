@@ -1,29 +1,32 @@
 from flask import Flask, request, jsonify
 import json
 import logging as log
-import core
+import gpt
 
 app = Flask(__name__)
 
 @app.route('/gpt3', methods=['POST'])
 def gpt3():
-    messages = request.form.get('messages')
-    chat_id = request.form.get('chat_id')
 
-    msg_model: dict[str, str] = json.loads(messages)
+    body = request.get_json()
 
-    log.info("Received messages: \n" + msg_model)
+    messages = body['messages']
+    chat_id = body['chat_id']
 
-    message: str = core.gpt.prepare_data(msg_model)
-    answer = core.gpt.askAI(message)
+    print(f"Chat ID: {chat_id}\n")
+    print(f"Received messages: \n{messages}")
+
+    message: str = gpt.prepare_data(messages)
+    sender_text = gpt.askAI(message)
 
     resp = {
         "chat_id": chat_id,
-        "message": answer
+        "message": [sender_text]
     }
 
     log.info("Answer: \n" + resp)
-    return jsonify(answer)
+
+    return jsonify(resp)
 
 
 if __name__ == '__main__':
