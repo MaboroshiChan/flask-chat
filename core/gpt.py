@@ -5,13 +5,13 @@ import os
 key = os.environ['OPENAI_API_KEY']
 openai.api_key = key
 
-def prepare_data(message: dict[str, str])->str:
+def prepare_data(message: list[dict[str, str]])->str:
     # TODO: Implement data preparation
     log.info("Preparing messages")
     result = ""
-    for key, value in message.items():
-        log.info(f"Key: {key}, Value: {value}")
-        result += f"{key}: {value}\n\n"
+    for msg in message:
+        result += msg["sender"] + ": " + msg["text"] + "\n"
+    print(f"Result: \n{result}")
     return result
 
 def askAI(message: str)->str:
@@ -20,7 +20,7 @@ def askAI(message: str)->str:
     with open("prompt.txt", "a") as f:
         f.write(prompt)
     
-    prompt += "\n\n##\n\n"
+    log.info(f"Prompt: \n{prompt}")
     # append message to prompt
     prompt += message
     

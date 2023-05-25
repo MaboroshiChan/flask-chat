@@ -1,0 +1,19 @@
+curl http://localhost:8080/api/v1/products 
+        -H "Content-Type: application/json" \
+        -d "{
+                "chat_id": "1234567890",
+                "messages": [
+                    {
+                        "sender": "alice",
+                        "text": "你在干嘛？"
+                    },
+                    {
+                        "sender": "bob",
+                        "text": "我在想你呢"
+                    },
+                    {
+                        "sender": "alice",
+                        "text": "这么油腻的吗"
+                    }
+                ]
+            }" \
