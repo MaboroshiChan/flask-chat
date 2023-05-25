@@ -34,13 +34,11 @@ def askAI(message: str)->dict[str, str]:
         presence_penalty=0.5
     )
     log.info("Received response")
-    answers = response.choices[0].text.strip().split(":")
+    answers = response.choices[0].text.strip()
     # get prefix of answer which ended with ：
-    sender = answers[0]
-    text = answers[1]
 
-    log.info("Answer: \n" + text)
+    log.info("Answer: \n" + answers)
     return {
-        "sender": sender,
-        "text": text
+        "sender": 'bob',
+        "text": answers
     }

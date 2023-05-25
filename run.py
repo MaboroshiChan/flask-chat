@@ -5,7 +5,7 @@ import gpt
 
 app = Flask(__name__)
 
-@app.route('/gpt3', methods=['POST'])
+@app.route('/api/gpt3', methods=['POST'])
 def gpt3():
 
     body = request.get_json()
@@ -18,6 +18,8 @@ def gpt3():
 
     message: str = gpt.prepare_data(messages)
     sender_text = gpt.askAI(message)
+
+    print("Answer: \n" + str(sender_text))
 
     resp = {
         "chat_id": chat_id,

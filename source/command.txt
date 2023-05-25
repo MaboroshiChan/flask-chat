@@ -1,4 +1,4 @@
-curl http://localhost:8000/gpt3 \
+curl http://localhost:8000/api/gpt3 \
         -H "Content-Type: application/json" \
         -d '{"chat_id": "1234567890",
                 "messages": [
