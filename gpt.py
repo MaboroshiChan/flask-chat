@@ -17,10 +17,10 @@ def prepare_data(message: list[dict[str, str]])->str:
 def askAI(message: str)->dict[str, str]:
     prompt = ""
     # open prompt.txt, read the contents, and append it to prompt
-    with open("prompt.txt", "a") as f:
-        f.write(prompt)
+    with open("./source/prompt.txt", "r") as f:
+        prompt += f.read()
     
-    log.info(f"Prompt: \n{prompt}")
+    log.info(f"Read prompt: \n{prompt}")
     # append message to prompt
     prompt += message
     
@@ -38,6 +38,7 @@ def askAI(message: str)->dict[str, str]:
     # get prefix of answer which ended with ：
     sender = answers[0]
     text = answers[1]
+
     log.info("Answer: \n" + text)
     return {
         "sender": sender,

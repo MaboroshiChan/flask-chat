@@ -24,8 +24,7 @@ def gpt3():
         "message": [sender_text]
     }
 
-    log.info("Answer: \n" + resp)
-
+    log.info("Answer: \n" + str(resp))
     return jsonify(resp)
 
 
