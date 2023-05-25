@@ -14,8 +14,16 @@ def prepare_data(message: dict[str, str])->str:
         result += f"{key}: {value}\n\n"
     return result
 
-def askAI(message)->str:
-    prompt = f"{message}\n"
+def askAI(message: str)->str:
+    prompt = ""
+    # open prompt.txt, read the contents, and append it to prompt
+    with open("prompt.txt", "a") as f:
+        f.write(prompt)
+    
+    prompt += "\n\n##\n\n"
+    # append message to prompt
+    prompt += message
+    
     response = openai.Completion.create(
         engine="davinci",
         prompt=prompt,
