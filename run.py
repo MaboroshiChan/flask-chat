@@ -17,8 +17,8 @@ def gpt3():
     print(f"Chat ID: {chat_id}\n")
     print(f"Received messages: \n{messages}")
 
-    detector = detector.Detector()
-    if detector.detect_list([x['text'] for x in messages]):
+    det = detector.Detector()
+    if det.detect_list([x['text'] for x in messages]):
         log.info("Detected keywords, not sending to GPT-3")
         return jsonify({
             "chat_id": chat_id,

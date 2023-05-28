@@ -11,7 +11,7 @@ class Detector:
         self.load_keywords()
     
     def load_keywords(self):
-        with open("keywords.txt", "r") as f:
+        with open("./source/敏感词.txt", "r") as f:
             self.keywords = f.readlines()
             self.keywords = [x.strip() for x in self.keywords]
         log.info("Loaded keywords")
