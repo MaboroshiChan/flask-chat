@@ -1,7 +1,4 @@
 # This file is used to detect if a given text contains certain words.
-
-import re
-import os
 import logging as log
 import jieba
 

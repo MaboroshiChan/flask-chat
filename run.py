@@ -1,5 +1,4 @@
 from flask import Flask, request, jsonify
-import json
 import logging as log
 import gpt
 import detector
