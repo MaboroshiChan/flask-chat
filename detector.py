@@ -25,3 +25,4 @@ class Detector:
             if self.detect(t):
                 return True
         return False
+    
