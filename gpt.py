@@ -10,6 +10,9 @@ def prepare_data(message: list[dict[str, str]])->str:
     log.info("Preparing messages")
     result = ""
     for msg in message:
+        if msg["sender"] == "prompt":
+            # TODO: generate a prompt for the following message
+            result += "[{prompt}]\n".format(prompt=msg["text"])
         result += msg["sender"] + ": " + msg["text"] + "\n"
     print(f"Result: \n{result}")
     return result

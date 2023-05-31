@@ -21,10 +21,7 @@ def gpt3():
         log.info("Detected keywords, not sending to GPT-3")
         return jsonify({
             "chat_id": chat_id,
-            "message": [{
-                "sender": "System",
-                "text": "Detected keywords, not sending to GPT-3"
-            }]
+            "warning": "Detected keywords, not sending to GPT-3"
         })
     message: str = gpt.prepare_data(messages)
     
