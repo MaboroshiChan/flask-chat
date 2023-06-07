@@ -26,20 +26,27 @@ def askAI(message: str)->dict[str, str]:
     log.info(f"Read prompt: \n{prompt}")
     # append message to prompt
     prompt += message
+    try:
+        response = openai.Completion.create(
+            engine="text-davinci-003",
+            prompt=prompt,
+            temperature=0.75,
+            max_tokens=150,
+            top_p=1,
+            frequency_penalty=0,
+            presence_penalty=0.5,
+            stream=True
+        )
+        log.info("Received response")
+        answers = response.choices[0].text.strip()
+        # get prefix of answer which ended with ：
+    except Exception as e:
+        log.error("Error: " + str(e))
+        return {
+            "sender": 'system',
+            "text": "Error: " + str(e)
+        }
     
-    response = openai.Completion.create(
-        engine="text-davinci-003",
-        prompt=prompt,
-        temperature=0.75,
-        max_tokens=150,
-        top_p=1,
-        frequency_penalty=0,
-        presence_penalty=0.5
-    )
-    log.info("Received response")
-    answers = response.choices[0].text.strip()
-    # get prefix of answer which ended with ：
-
     log.info("Answer: \n" + answers)
     return {
         "sender": 'bob',
