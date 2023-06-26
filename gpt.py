@@ -97,4 +97,8 @@ def askAIStream(message: str):
             "text": "Error: " + str(e)
         }
 
-    
+def ping():
+    return askAI("Say pong")
+
+def ping_stream():
+    return askAIStream("Say pong")
