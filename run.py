@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, stream_with_context, json
 import logging as log
 import gpt
 import detector
@@ -25,17 +25,18 @@ def gpt3():
         })
     message: str = gpt.prepare_data(messages)
     
-    sender_text = gpt.askAI(message)
+    chunks = gpt.askAIStream(message)
 
-    print("Answer: \n" + str(sender_text))
+    def generate():
+        for chunk in chunks:
+            print(f"Chunk: \n{chunk}")
+            resp = {
+                "chat_id": chat_id,
+                "message": chunk
+            }
+            yield json.dumps(resp) + "\n"
 
-    resp = {
-        "chat_id": chat_id,
-        "message": [sender_text]
-    }
-
-    log.info("Answer: \n" + str(resp))
-    return jsonify(resp)
+    return app.response_class(stream_with_context(generate()))
 
 if __name__ == '__main__':
     log.basicConfig(level=log.INFO)
