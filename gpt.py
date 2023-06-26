@@ -30,7 +30,10 @@ def append_prompt(prompt: str ,message: str)->str:
     prompt += message
     return prompt
 
-
+"""
+    This function is used to send a single message to GPT-3.
+    Now deprecated. Use askAIStream instead.
+"""
 def askAI(message: str)->dict[str, str]:
     prompt = read_prompt("./source/prompt.txt")
     prompt = append_prompt(prompt, message)
@@ -62,7 +65,6 @@ def askAI(message: str)->dict[str, str]:
 
 """
     This function is used to stream the response from GPT-3
-    It is not used in the current version of the app
 """
 def askAIStream(message: str):
     prompt = read_prompt("./source/prompt.txt")
