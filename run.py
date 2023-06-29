@@ -84,8 +84,6 @@ def ping_stream():
             yield json.dumps(resp) + "\n"
     return app.response_class(stream_with_context(generate()))
 
-
-
 if __name__ == '__main__':
     log.basicConfig(level=log.INFO)
     log.info("Starting server")

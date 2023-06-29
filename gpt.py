@@ -98,7 +98,7 @@ def askAIStream(message: str):
         }
 
 def ping():
-    return askAI("Say pong")
+    return askAI("你喜欢我吗?")
 
 def ping_stream():
-    return askAIStream("Say pong")
+    return askAIStream("Tell me about the history of the United States of America")
