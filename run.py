@@ -67,6 +67,17 @@ def gpt3_single():
             "message": response
         })
 
+@app.route('/api/feedback', methods=['POST'])
+def feedback():
+    body = request.get_json()
+    message = body['message']
+    chat_id = body['chat_id']
+    usr_id = body['usr_id']
+    log.info("Feedback received from user {usr_id} in chat {chat_id}: \n{message}"
+             .format(usr_id=usr_id, chat_id=chat_id, message=message))
+    
+
+
 @app.route('/ping', methods=['GET'])
 def ping():
     pong = gpt.ping()
