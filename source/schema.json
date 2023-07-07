@@ -1,0 +1,26 @@
+{
+    "uid": "12345",
+    "chat_id": "12345",
+    "messages": [
+        {
+            "sender": "Bob",
+            "message": "Hello, welcome to the chat room!",
+            "options": {
+                "is_generated": false,
+                "rating": null
+            }
+        },
+        {
+            "sender": "Bob",
+            "message": "Please enter your name:",
+            "options": {
+                "is_generated": true,
+                "rating": 1
+            }
+        },
+        {
+            "sender": "Alice",
+            "message": "Hahahahahahaha"
+        }
+    ]
+}
