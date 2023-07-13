@@ -4,72 +4,81 @@ import os
 
 key = os.environ['OPENAI_API_KEY']
 openai.api_key = key
+path = "./source/prompt.txt"
 
-def prepare_data(message: list[dict[str, str]])->str:
-    # TODO: Implement data preparation
-    log.info("Preparing messages")
-    result = ""
-    for msg in message:
-        if msg["sender"] == "prompt":
-            # TODO: generate a prompt for the following message
-            result += "[{prompt}]\n".format(prompt=msg["text"])
-        result += msg["sender"] + ": " + msg["text"] + "\n"
-    print(f"Result: \n{result}")
-    return result
-
-def read_prompt(path)->str:
-    prompt = ""
-    # open prompt.txt, read the contents, and append it to prompt
-    with open(path, "r") as f:
-        prompt += f.read()
+class PreProcessor:
+    def __init__(self, prompt_path: str):
+        self.prompt_path = prompt_path
+        self.prompt = ""
+        self.messages: list[dict[str, str]] = []
+        # open prompt.txt, read the contents, and append it to prompt
+        with open(path, "r") as f:
+            prompt += f.read()
+        log.info(f"Read prompt: \n{prompt}")
     
-    log.info(f"Read prompt: \n{prompt}")
-    return prompt
+    def append_prompt(prompt: str ,message: str)->str:
+        prompt += message
+        return prompt
+    
+    def prepare_data(self)->str:
+        # TODO: Implement data preparation
+        log.info("Preparing messages")
+        self.final_prompt = self.prompt
 
-def append_prompt(prompt: str ,message: str)->str:
-    prompt += message
-    return prompt
+        for msg in self.messages:
+            if msg["sender"] == "prompt":
+                # TODO: generate a prompt for the following message
+                final_prompt += "[{prompt}]\n".format(prompt=msg["text"])
+            final_prompt += msg["sender"] + ": " + msg["text"] + "\n"
 
-"""
-    This function is used to send a single message to GPT-3.
-    Now deprecated. Use askAIStream instead.
-"""
-def askAI(message: str)->dict[str, str]:
-    prompt = read_prompt("./source/prompt.txt")
-    prompt = append_prompt(prompt, message)
-    try:
-        response = openai.Completion.create(
-            engine="text-davinci-003",
-            prompt=prompt,
-            temperature=0.75,
-            max_tokens=150,
-            top_p=1,
-            frequency_penalty=0,
-            presence_penalty=0.5
-        )
-        log.info("Received response")
-        answers = response.choices[0].text.strip()
+        self.final_prompt += "Chris: "
+        print(f"Final Prompt: \n{final_prompt}")
+        return self.final_prompt
+    
+    def askAI(self, stream: bool)->dict[str, str]:
+        try:
+            if not self.final_prompt or self.final_prompt == "":
+                raise Exception("Prompt is empty")
+            
+            response = openai.Completion.create(
+                engine="text-davinci-003",
+                prompt=self.final_prompt,
+                temperature=0.75,
+                max_tokens=150,
+                top_p=1,
+                frequency_penalty=0,
+                presence_penalty=0.5,
+                stream=stream
+            )
+            log.info("Received response")
 
-    except Exception as e:
-        log.error("Error: " + str(e))
-        return {
-            "sender": 'system',
-            "text": "Error: " + str(e)
-        }
+            if stream:
+                for chunk in response:
+                    resp: str = chunk.choices[0].text.strip()
+                    yield {
+                        "sender": 'Chris',
+                        "text": resp
+                    }
+            else:
+                answers = response.choices[0].text.strip()
+                log.info("Answer: \n" + answers)
+                return {
+                    "sender": 'Chris',
+                    "text": answers
+                }
+            
+        except Exception as e:
+            log.error("Error: " + str(e))
+            return {
+                "sender": 'System',
+                "text": "Error: " + str(e)
+            }
 
-    log.info("Answer: \n" + answers)
-    return {
-        "sender": 'bob',
-        "text": answers
-    }
+        
+ 
 
-"""
-    This function is used to stream the response from GPT-3
-"""
 def askAIStream(message: str):
-    prompt = read_prompt("./source/prompt.txt")
     prompt = append_prompt(prompt, message)
-
     try:
         response = openai.Completion.create(
             engine="text-davinci-003",

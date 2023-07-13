@@ -7,7 +7,7 @@ from flask_socketio import SocketIO, emit
 
 
 app = Flask(__name__)
-CORS(app, origins=['http://localhost:8080', 'http://localhost:8000', 'http://localhost:9000'], supports_credentials=True, methods=['GET', 'POST', 'OPTIONS']) 
+CORS(app, origins=['http://127.0.0.1:8000', ' http://127.0.0.1:8081','http://localhost:8081'], supports_credentials=True, methods=['GET', 'POST']) 
 socketio = SocketIO(engineio_logger=True)
 socketio.init_app(app, cors_allowed_origins="*", async_mode='threading',transports=['websocket'])
 
@@ -71,9 +71,9 @@ def gpt3_single():
                 "warning": "Detected keywords, not sending to GPT-3"
             })
         message: str = gpt.prepare_data(messages)
-        response = gpt.askAI(message)
+        response: dict[str, str] = gpt.askAI(message)
 
-        log.info("Response: \n" + response)
+        log.info("Response: \n" + str(response))
         return jsonify({
             "chat_id": chat_id,
             "message": response
@@ -138,5 +138,5 @@ def disconnect():
 if __name__ == '__main__':
     log.basicConfig(level=log.INFO)
     log.info("Starting server")
-    #app.run(host='localhost', port=9000, debug=True)
-    socketio.run(app, host='127.0.0.1', port=9000, debug=True)
+    app.run(host='localhost', port=8000, debug=True)
+    #socketio.run(app, host='127.0.0.1', port=9000, debug=True)
