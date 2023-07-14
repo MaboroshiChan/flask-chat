@@ -7,11 +7,16 @@ from flask_socketio import SocketIO, emit
 
 
 app = Flask(__name__)
-CORS(app, origins=['http://127.0.0.1:8000', ' http://127.0.0.1:8081','http://localhost:8081'], supports_credentials=True, methods=['GET', 'POST']) 
+CORS(app, origins=['http://127.0.0.1:8000', ' http://127.0.0.1:8081',
+     'http://localhost:8081'], supports_credentials=True, methods=['GET', 'POST'])
 socketio = SocketIO(engineio_logger=True)
-socketio.init_app(app, cors_allowed_origins="*", async_mode='threading',transports=['websocket'])
+socketio.init_app(app, cors_allowed_origins="*",
+                  async_mode='threading', transports=['websocket'])
+path = "./source/prompt.txt"
 
-def process_messages(chat_id: str, messages: list[dict[str, str]]):
+preprocessor = gpt.PreProcessor(path)
+
+def process_messages(chat_id: str, messages: list[dict[str, str]], stream: bool = False):
     det = detector.Detector()
     if det.detect_list([x['text'] for x in messages]):
         log.info("Detected keywords, not sending to GPT-3")
@@ -19,8 +24,10 @@ def process_messages(chat_id: str, messages: list[dict[str, str]]):
             "chat_id": 'System',
             "warning": "Detected keywords, not sending to GPT-3"
         })
-    message: str = gpt.prepare_data(messages)
-    chunks = gpt.askAIStream(message)
+    preprocessor.add_messages(messages)
+    preprocessor.prepare_data()
+
+    chunks = preprocessor.askAI(stream=stream)
     return chunks
 
 @app.route('/')
@@ -28,8 +35,30 @@ def index():
     print("Sucessfully connected to server")
     return 'hello world'
 
-@app.route('/api/gpt3/stream', methods=['POST'])
+@app.route('/api/gpt3', methods=['POST'])
 def gpt3():
+
+    body = request.get_json()
+    messages = body['messages']
+    chat_id = body['chat_id']
+
+    print(f"Chat ID: {chat_id}\n")
+    print(f"Received messages: \n{messages}")
+
+    chunks = process_messages(chat_id, messages, stream=True)
+
+    def generate():
+        for chunk in chunks:
+            # print(f"Chunk: \n{chunk}")
+            resp = {
+                "chat_id": chat_id,
+                "message": chunk
+            }
+            yield json.dumps(resp) + "\n"
+
+    return app.response_class(stream_with_context(generate()))
+
+def gpt3_single():
 
     body = request.get_json()
 
@@ -39,45 +68,21 @@ def gpt3():
     print(f"Chat ID: {chat_id}\n")
     print(f"Received messages: \n{messages}")
 
-    chunks = process_messages(chat_id, messages)
-
-    def generate():
-        for chunk in chunks:
-            print(f"Chunk: \n{chunk}")
-            resp = {
-                "chat_id": chat_id,
-                "message": chunk
-            }
-            yield json.dumps(resp) + "\n"
-
-    return app.response_class(stream_with_context(generate()))
-
-@app.route('/api/gpt3', methods=['POST'])
-def gpt3_single():
-    
-        body = request.get_json()
-    
-        messages = body['messages']
-        chat_id = body['chat_id']
-    
-        print(f"Chat ID: {chat_id}\n")
-        print(f"Received messages: \n{messages}")
-    
-        det = detector.Detector()
-        if det.detect_list([x['text'] for x in messages]):
-            log.info("Detected keywords, not sending to GPT-3")
-            return jsonify({
-                "chat_id": chat_id,
-                "warning": "Detected keywords, not sending to GPT-3"
-            })
-        message: str = gpt.prepare_data(messages)
-        response: dict[str, str] = gpt.askAI(message)
-
-        log.info("Response: \n" + str(response))
+    det = detector.Detector()
+    if det.detect_list([x['text'] for x in messages]):
+        log.info("Detected keywords, not sending to GPT-3")
         return jsonify({
             "chat_id": chat_id,
-            "message": response
+            "warning": "Detected keywords, not sending to GPT-3"
         })
+    message: str = gpt.prepare_data(messages)
+    response: dict[str, str] = gpt.askAI(message)
+
+    log.info("Response: \n" + str(response))
+    return jsonify({
+        "chat_id": chat_id,
+        "message": response
+    })
 
 @app.route('/api/feedback', methods=['POST'])
 def feedback():
@@ -96,6 +101,7 @@ def ping():
 @app.route('/ping/stream', methods=['GET'])
 def ping_stream():
     pong = gpt.ping_stream()
+
     def generate():
         for chunk in pong:
             resp = {
@@ -106,6 +112,8 @@ def ping_stream():
     return app.response_class(stream_with_context(generate()))
 
 # websocket
+
+
 @socketio.on('connect', namespace='/websocket')
 def connect(data):
     usr_id = data['usr_id']
@@ -134,9 +142,8 @@ def message(data):
 def disconnect():
     log.info("Client disconnected")
 
-
 if __name__ == '__main__':
     log.basicConfig(level=log.INFO)
     log.info("Starting server")
     app.run(host='localhost', port=8000, debug=True)
-    #socketio.run(app, host='127.0.0.1', port=9000, debug=True)
+    # socketio.run(app, host='127.0.0.1', port=9000, debug=True)

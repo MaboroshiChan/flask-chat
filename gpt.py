@@ -4,7 +4,6 @@ import os
 
 key = os.environ['OPENAI_API_KEY']
 openai.api_key = key
-path = "./source/prompt.txt"
 
 class PreProcessor:
     def __init__(self, prompt_path: str):
@@ -12,13 +11,12 @@ class PreProcessor:
         self.prompt = ""
         self.messages: list[dict[str, str]] = []
         # open prompt.txt, read the contents, and append it to prompt
-        with open(path, "r") as f:
-            prompt += f.read()
-        log.info(f"Read prompt: \n{prompt}")
-    
-    def append_prompt(prompt: str ,message: str)->str:
-        prompt += message
-        return prompt
+        with open(prompt_path, "r") as f:
+            self.prompt += f.read()
+        log.info(f"Read prompt: \n{self.prompt}")
+
+    def add_messages(self, messages: list[dict[str, str]]):
+        self.messages = messages
     
     def prepare_data(self)->str:
         # TODO: Implement data preparation
@@ -28,14 +26,14 @@ class PreProcessor:
         for msg in self.messages:
             if msg["sender"] == "prompt":
                 # TODO: generate a prompt for the following message
-                final_prompt += "[{prompt}]\n".format(prompt=msg["text"])
-            final_prompt += msg["sender"] + ": " + msg["text"] + "\n"
+                self.final_prompt += "[{prompt}]\n".format(prompt=msg["text"])
+            self.final_prompt += msg["sender"] + ": " + msg["text"] + "\n"
 
         self.final_prompt += "Chris: "
-        print(f"Final Prompt: \n{final_prompt}")
+        print(f"Final Prompt: \n{self.final_prompt}")
         return self.final_prompt
     
-    def askAI(self, stream: bool)->dict[str, str]:
+    def askAI(self, stream: bool=False):
         try:
             if not self.final_prompt or self.final_prompt == "":
                 raise Exception("Prompt is empty")
@@ -60,12 +58,13 @@ class PreProcessor:
                         "text": resp
                     }
             else:
-                answers = response.choices[0].text.strip()
-                log.info("Answer: \n" + answers)
-                return {
+                resp: dict[str, str] = {
                     "sender": 'Chris',
-                    "text": answers
+                    "text": ""
                 }
+                for chunk in response:
+                    resp["text"] += chunk.choices[0].text.strip()
+                return resp
             
         except Exception as e:
             log.error("Error: " + str(e))
@@ -73,41 +72,3 @@ class PreProcessor:
                 "sender": 'System',
                 "text": "Error: " + str(e)
             }
-
-        
- 
-
-def askAIStream(message: str):
-    prompt = append_prompt(prompt, message)
-    try:
-        response = openai.Completion.create(
-            engine="text-davinci-003",
-            prompt=prompt,
-            temperature=0.75,
-            max_tokens=150,
-            top_p=1,
-            frequency_penalty=0,
-            presence_penalty=0.5,
-            stream=True
-        )
-        log.info("Received response")
-    
-        for chunk in response:
-            resp: str = chunk.choices[0].text.strip()
-            yield {
-                "sender": 'bob',
-                "text": resp
-            }
-
-    except Exception as e:
-        log.error("Error: " + str(e))
-        yield {
-            "sender": 'system',
-            "text": "Error: " + str(e)
-        }
-
-def ping():
-    return askAI("你喜欢我吗?")
-
-def ping_stream():
-    return askAIStream("Tell me about the history of the United States of America")
